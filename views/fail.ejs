@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <%- include('./layouts/header') %>
+    </head>
+    <style>
+        .error {
+            color: red;
+        }
+    </style>
+    <body>
+        <div class="px-4 py-5 my-5 text-center">
+            <a class="btn btn-primary" href="/">Home</a>
+            <h1 class="display-5 fw-bold">Failed</h1>
+            <h3 class="error">Error: <%= error %></h3>
+        </div>
+    </body>
+</html>

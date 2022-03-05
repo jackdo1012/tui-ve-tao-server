@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <%- include('./layouts/header') %>
+    </head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .authentication-box,
+        .file-submit {
+            position: relative;
+            text-align: center;
+            width: 50vw;
+            left: 25vw;
+            padding: 20px;
+        }
+
+        .authentication-box button,
+        .file-submit button {
+            margin: 20px;
+        }
+
+        .password-title {
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        table {
+            width: 50vw;
+            border-collapse: collapse;
+            margin-left: 50vw;
+            transform: translateX(-50%);
+        }
+
+        table tbody tr td {
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        table tbody tr td img {
+            max-width: 50vw;
+        }
+    </style>
+
+    <body>
+        <button class="btn btn-primary change-password-visibility">
+            Show password
+        </button>
+        <p class="password-title"></p>
+        <% if (files === undefined) { %>
+        <div class="authentication-box">
+            <input
+                class="pass form-control"
+                type="password"
+                name="pass"
+                placeholder="Enter your password: "
+            />
+            <button class="auth btn btn-primary" type="submit">
+                Submit password
+            </button>
+        </div>
+        <% } else { %>
+        <div class="authentication-box">
+            <button class="btn btn-primary logout">Logout</button>
+        </div>
+        <% } %> <% if (files !== undefined) { %>
+        <form
+            class="file-submit"
+            action="/image/upload"
+            method="POST"
+            enctype="multipart/form-data"
+        >
+            <input type="file" name="images" class="form-control" multiple />
+            <input
+                type="text"
+                name="link"
+                placeholder="Facebook link"
+                class="form-control"
+            />
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <% } %> <% if(files!==undefined && files.length > 0) { %>
+        <table>
+            <% files.reverse().forEach(function(file) { %>
+            <tr>
+                <td>
+                    <img src="image/<%= file.img.filename %>" alt="" />
+                </td>
+                <td><%= file.link %></td>
+                <td>
+                    <form
+                        method="POST"
+                        action="/image/delete/<%= file.img._id %>?_method=DELETE"
+                    >
+                        <button class="btn btn-danger btn-block">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            <% }) %>
+        </table>
+        <% } else if (files !== undefined && files.length === 0 ) { %>
+        <p class="alert alert-danger text-center m-5">No files found</p>
+        <% } %>
+    </body>
+    <script>
+        const passwordTitle = document.querySelector(".password-title")
+        const auth = document.querySelector(".auth")
+        const password = document.querySelector(".pass")
+        const passwordVisibilityChange = document.querySelector(
+            ".change-password-visibility"
+        )
+        const logout = document.querySelector(".logout")
+
+        const cookie = () => {
+            let cookie = {}
+            document.cookie
+                .replaceAll(" ", "")
+                .split(";")
+                .forEach((item) => {
+                    const [key, value] = item.split("=")
+                    cookie[key] = value
+                })
+            return cookie
+        }
+        let passHidden = true
+
+        passwordVisibilityChange.onclick = () => {
+            passHidden = !passHidden
+            passwordVisibilityChange.innerHTML = passHidden
+                ? "Show password"
+                : "Hide password"
+            displayPass()
+        }
+
+        const displayPass = () => {
+            let user
+            if (passHidden && cookie().pass !== undefined) {
+                user = "*".repeat(cookie().pass.length)
+            } else {
+                user = cookie().pass === undefined ? "" : cookie().pass
+            }
+            passwordTitle.innerHTML = "Password: " + user || ""
+        }
+        displayPass()
+
+        auth
+            ? (auth.onclick = () => {
+                  if (auth === "") return
+                  document.cookie = `pass=${password.value}`
+                  displayPass()
+                  password.value = ""
+                  location.reload()
+              })
+            : (logout.onclick = () => {
+                  document.cookie = `pass=`
+                  location.reload()
+              })
+    </script>
+</html>
